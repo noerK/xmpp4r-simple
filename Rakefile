@@ -16,8 +16,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 require 'rake/testtask'
-require 'rake/rdoctask'
-require 'rcov/rcovtask'
+require 'rdoc/task'
 
 desc "Package Gem"
 task :package do
@@ -34,14 +33,21 @@ Rake::TestTask.new :tests do |test|
 end
 
 desc "Generate Documentation"
-Rake::RDocTask.new do |rdoc|
+RDoc::Task.new do |rdoc|
   rdoc.main = "README"
   rdoc.rdoc_dir = "doc"
   rdoc.rdoc_files.include("README", "COPYING", "lib/*.rb")
   rdoc.title = "Jabber::Simple"
 end
 
-Rcov::RcovTask.new do |t|
-  t.test_files = FileList['test/**/test*.rb'] 
-  t.rcov_opts << "--sort coverage"
+begin
+  require 'simplecov'
+
+  desc "Execute tests with coverage report"
+  task :rcov do
+    SimpleCov.start do
+      Rake::Task["tests"].execute
+    end
+  end
+rescue LoadError
 end
